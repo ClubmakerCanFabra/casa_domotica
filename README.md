@@ -1,2 +1,2 @@
-# casa-dom-tica
+# casa-domotica
 Casa domòtica amb Home Assistant
