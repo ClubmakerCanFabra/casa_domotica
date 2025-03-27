@@ -1,0 +1,41 @@
+esphome:
+  name: bany
+  friendly_name: bany
+
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+web_server:
+  port: 80
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "0Awke4Md2Sd/ueldF4Q/pWRp1mPdJNqnH8xvt4qDV8U="
+
+ota:
+  - platform: esphome
+    password: "7e973f6cbec5d0544755e141bac0e6c7"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Bany Fallback Hotspot"
+    password: !secret wifi_password
+
+captive_portal:
+
+sensor:
+- platform: dht
+  pin: GPIO12    # Wemos pin D6
+  temperature:
+    name: "WC Temperatura"
+  humidity:
+    name: "WC Humitat"
+  update_interval: 3s

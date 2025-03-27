@@ -1,0 +1,100 @@
+esphome:
+  name: oled
+  friendly_name: oled
+
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Allow web connection with the device
+web_server:
+  port: 80
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "vRXLmBsNx2bOx+JNqJXcYC2bi8EsqtGcM9YoexEkdkc="
+
+ota:
+  - platform: esphome
+    password: "ff1bebf0c2a85df04ad5f4ab3d086536"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Oled Fallback Hotspot"
+    password: !secret wifi_password
+
+captive_portal:
+
+i2c:
+  sda: GPIO4 # wemos pin D2
+  scl: GPIO5 # wemos pin D1
+  #scan: false
+
+time:
+  - platform: homeassistant
+    id: esptime
+
+sensor:
+  - platform: bme280_i2c
+    temperature:
+      name: "BME280 Temperature"
+      oversampling: 16x
+    pressure:
+      name: "BME280 Pressure"
+    humidity:
+      name: "BME280 Humidity"
+    address: 0x76
+    update_interval: 5s
+
+  # Variables internes que agafaran valors de HomeAssistant
+  - platform: homeassistant
+    id: inside_temperature    # Nom de la variable interna
+    entity_id: sensor.oled_bme280_temperature    # Nom de la variable de HAss
+    internal: true
+  - platform: homeassistant
+    id: outside_temperature
+    entity_id: sensor.bany_wc_temperatura
+    internal: true
+  - platform: homeassistant
+    id: inside_humidity
+    entity_id: sensor.oled_bme280_humidity
+    internal: true
+  - platform: homeassistant
+    id: local_pressure
+    entity_id: sensor.oled_bme280_pressure
+    internal: true
+
+font:
+  - file: 'slkscr.ttf'
+    id: font1
+    size: 8
+  - file: 'BebasNeue-Regular.ttf'
+    id: font2
+    size: 36
+  - file: 'arial.ttf'
+    id: font3
+    size: 14
+
+# https://esphome.io/cookbook/display_time_temp_oled.html
+# https://esphome.io/components/display/
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    id: my_display
+    address: 0x3C
+    update_interval: 5s
+    lambda:
+      it.printf(64, 0, id(font1), TextAlign::TOP_CENTER, "Casa Domotica-ClubMaker");
+      it.strftime(0, 10, id(font2), TextAlign::TOP_LEFT, "%H:%M", id(esptime).now());
+      it.printf(127, 12, id(font3), TextAlign::TOP_RIGHT, "%.1f °C", id(inside_temperature).state);
+      it.printf(127, 30, id(font3), TextAlign::TOP_RIGHT, "%.1f °C", id(outside_temperature).state);
+      it.printf(0, 63, id(font3), TextAlign::BASELINE_LEFT, "%.0f %%rH", id(inside_humidity).state);
+      it.printf(64, 63, id(font3), TextAlign::BASELINE_LEFT, "%.0f hPa", id(local_pressure).state);

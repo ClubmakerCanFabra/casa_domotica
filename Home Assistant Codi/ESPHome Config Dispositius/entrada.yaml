@@ -1,0 +1,91 @@
+esphome:
+  name: entrada
+  friendly_name: entrada
+
+esp8266:
+  board: esp01_1m
+
+# Enable logging
+logger:
+
+# Allow web connection with the device
+web_server:
+  port: 80
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "WFseGXkDFIprNJYMsBJFEl3gGXTRubJmObX3TkqA23s="
+
+  services:
+    - service: play_rtttl
+      variables:
+        song_str: string    # la cançó va com un Servei de HAss
+      then:
+        - rtttl.play:
+            rtttl: !lambda 'return song_str;'
+
+ota:
+  - platform: esphome
+    password: "e07e95c25af9450687c65e37c391e05a"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Entrada Fallback Hotspot"
+    password: !secret wifi_password
+
+captive_portal:
+
+# Llum entrada casa
+switch:
+  - platform: gpio
+    pin: GPIO05  # pin D1
+    name: "Llum Entrada"
+    inverted: false
+
+# https://www.reddit.com/r/homeassistant/comments/fxieug/esphome_and_push_buttons/?tl=es-es&rdt=52475
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO02  # pin D4
+      mode: INPUT_PULLUP
+      inverted: True
+    name: "Timbre Porta"
+    id: timbre_porta
+
+# https://devices.esphome.io/devices/Generic-PIR
+  - platform: gpio
+    pin: GPIO04  # pin D2
+    name: "PIR Sensor"
+    device_class: motion
+    id: pir_sensor
+
+# https://esphome.io/components/rtttl.html
+# https://aguacatec.es/reproducir-politonos-con-esphome/
+# Bronzidor timbre casa
+output:
+  - platform: esp8266_pwm
+    pin: GPIO00  # pin D3
+    id: rtttl_out
+
+rtttl:
+  output: rtttl_out
+  id: meu_rtttl
+  # gain: 60%
+
+# https://esphome.io/components/binary_sensor/rc522.html
+spi:
+  clk_pin: GPIO14  # pin D5 --> SCK on this board
+  mosi_pin: GPIO13  # pin D7 --> MOSI
+  miso_pin: GPIO12  # pin D6 --> MISO
+
+rc522_spi:
+  cs_pin: GPIO15  # pin D8 --> SDA
+  reset_pin: GPIO16  # pin D0 --> RST
+  on_tag:
+    then:
+      - homeassistant.tag_scanned: !lambda 'return x;'

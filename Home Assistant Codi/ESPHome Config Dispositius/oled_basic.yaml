@@ -1,0 +1,80 @@
+esphome:
+  name: oled
+  friendly_name: oled
+
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "vRXLmBsNx2bOx+JNqJXcYC2bi8EsqtGcM9YoexEkdkc="
+
+ota:
+  password: "ff1bebf0c2a85df04ad5f4ab3d086536"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Oled Fallback Hotspot"
+    password: !secret wifi_password
+
+captive_portal:
+
+i2c:
+  sda: GPIO4 # wemos pin D2
+  scl: GPIO5 # ewmos pin D1
+  #scan: false
+
+time:
+  - platform: homeassistant
+    id: esptime
+
+sensor:
+  - platform: bme280
+    temperature:
+      name: "BME280 Temperature"
+      id: bme280_temperature    # Nom de la variable interna
+      oversampling: 16x
+    pressure:
+      name: "BME280 Pressure"
+    humidity:
+      name: "BME280 Humidity"
+    address: 0x76
+    update_interval: 5s
+
+  # Variables internes que agafaran valors de HomeAssistant
+  - platform: homeassistant
+    id: dht11_temperature    # Nom de la variable interna
+    entity_id: sensor.bany_wc_temperatura    # Nom de la variable de HAss
+    internal: true
+
+font:
+  - file: 'slkscr.ttf'
+    id: font1
+    size: 8
+  - file: 'BebasNeue-Regular.ttf'
+    id: font2
+    size: 48
+  - file: 'arial.ttf'
+    id: font3
+    size: 14
+
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    id: my_display
+    address: 0x3C
+    update_interval: 5s
+    lambda:
+      it.print(0, 0, id(font3), "Carles");
+      it.print(0, 15, id(font3), "Lluis");
+      it.printf(0, 30, id(font3), "%.2f", id(bme280_temperature).state);
+      it.printf(0, 45, id(font3), "%.2f", id(dht11_temperature).state);

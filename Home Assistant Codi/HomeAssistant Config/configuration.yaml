@@ -1,0 +1,48 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+input_number:
+  servo_control:
+    initial: 0
+    min: -100
+    max: 50
+    step: 1
+    mode: slider
+
+input_button:
+  obre_porta:
+    name: Obre Porta
+    icon: mdi:arrow-up-bold-box-outline
+
+  tanca_porta:
+    name: Tanca Porta
+    icon: mdi:arrow-down-bold-box-outline
+
+  apaga_alertes:
+    name: Apaga Alertes
+    icon: mdi:arrow-down-bold-box-outline
+
+input_boolean:
+  obrint_tancant:
+    name: Obrint-Tancant
+    icon: mdi:boom-gate-up-outline
+
+  polsador_tiraled:
+    name: Polsador TiraLed
+    icon: mdi:ceiling-light
+    
+  polsador_alerta:
+    name: Polsador Alerta
+    icon: mdi:boom-gate-up-outline
